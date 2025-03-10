@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Player Form</title>
+</head>
+<body>
+    <h2>Join This Team</h2>
+    <p>Share this link to invite players:</p>
+    <input type="text" value="{{ unique_link }}" readonly style="width: 100%;" />
+
+    <h3>Add a Player</h3>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add Player</button>
+    </form>
+
+    <h3>Players List</h3>
+    <ul>
+        {% for player in players %}
+            <li>{{ player.name }} - {{ player.role }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

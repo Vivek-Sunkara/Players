@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Student TimeTable</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'profile' %}">Home</a>
+                </li>
+                {% if team %}  <!-- Ensure team exists before using team.id -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'add_players' team.id %}">Add Players</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'create_team' %}">Create a Team</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Welcome, {{ user.username }}!</h2>
+        <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+
+        <!-- Add a button to create a team -->
+        <a href="{% url 'create_team' %}" class="btn btn-primary">Create a Team</a>
+
+        <!-- Display player info in card form -->
+        <div class="row mt-4">
+            {% for player in players %}
+            <div class="col-md-4">
+                <div class="card mb-3" onclick="window.location.href='{% url 'player_detail' player.id %}'" style="cursor: pointer;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ player.name }}</h5>
+                        <p class="card-text"><strong>Gender:</strong> {{ player.gender }}</p>
+                        <p class="card-text"><strong>Age:</strong> {{ player.age }}</p>
+                        <p class="card-text"><strong>Sport:</strong> {{ player.sport }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>No players available.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
