@@ -9,7 +9,38 @@ from .models import Player, Team, Creator
 from .forms import TeamForm, PlayerForm, CreatorForm
 from .utils import optimize_team 
 from django.http import Http404
+from django.http import JsonResponse
+from django.contrib import messages
+import logging
+from django.views.decorators.http import require_POST
 
+
+@login_required
+def delete_player(request, player_id):
+    """
+    Deletes a specific player.
+    """
+    player = get_object_or_404(Player, id=player_id, team__creator=request.user)
+
+    if request.method == 'POST':
+        player.delete()
+        return redirect('profile')
+
+    return redirect('profile')
+@require_POST
+@login_required
+def delete_all_players(request, team_id):
+    """
+    Permanently deletes all players belonging to a specific team
+    """
+    try:
+        team = get_object_or_404(Team, id=team_id, creator=request.user)
+        count, _ = Player.objects.filter(team=team).delete()
+        messages.success(request, f'Successfully deleted {count} players.')
+        return JsonResponse({'status': 'success', 'deleted_count': count})
+    except Exception as e:
+        logger.error(f"Error deleting players: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 def player_form(request, unique_link):
     """
     Displays the player form for a specific team.
@@ -140,7 +171,7 @@ def optimize_team_view(request, creator_id=None):
         raise ValueError(f"Invalid user associated with Creator: {creator.user}")
 
     # ✅ Fix the query by using `creator` (not `creator.user`)
-    players = Player.objects.filter(team__creator=creator.user)
+    players = Player.objects.filter(team__creator=creator)
 
     if not players.exists():
         return render(request, "error_page.html", {"message": "No players found for this creator."})
@@ -148,7 +179,6 @@ def optimize_team_view(request, creator_id=None):
     optimized_team = optimize_team(players, creator.num_bowlers, creator.num_batsmen)
 
     return render(request, 'optimal_team.html', {'creator': creator, 'optimal_team': optimized_team})
-
 @login_required
 def create_team(request):
     """

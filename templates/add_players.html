@@ -158,9 +158,9 @@
 
         {% if creator and creator.id %}
         <div class="text-center">
-            <form method="POST" action="{% url 'optimize_team_with_id' creator.id %}">
+            <form method="POST" action="{{ optimize_url }}">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-success btn-custom">Generate Optimal Team</button>
+                <button type="submit" class="btn btn-success">Generate Optimal Team</button>
             </form>
         </div>
         {% else %}

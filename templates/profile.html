@@ -97,19 +97,27 @@
 
     <div class="container">
         <h2>Welcome, {{ user.username }}!</h2>
-        <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+        {% if team %}
+        <a href="{% url 'delete_all_players' team.id %}" class="btn btn-danger">Delete All Players</a>
+        {% else %}
+        <p class="text-danger">No team available to delete players.</p>
+        {% endif %}
         <a href="{% url 'create_team' %}" class="btn btn-primary">Create a Team</a>
 
         <!-- Display player info in card form -->
         <div class="row mt-4">
             {% for player in players %}
             <div class="col-md-4">
-                <div class="card mb-4" onclick="window.location.href='{% url 'player_detail' player.id %}'" style="cursor: pointer;">
+                <div class="card mb-4" style="cursor: pointer;">
                     <div class="card-body">
                         <h5 class="card-title">{{ player.name }}</h5>
                         <p class="card-text"><strong>Gender:</strong> {{ player.gender }}</p>
                         <p class="card-text"><strong>Age:</strong> {{ player.age }}</p>
                         <p class="card-text"><strong>Sport:</strong> {{ player.sport }}</p>
+                        <form method="POST" action="{% url 'delete_player' player.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm mt-2">Delete</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -117,8 +125,6 @@
             <p>No players available.</p>
             {% endfor %}
         </div>
-    </div>
-
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>
