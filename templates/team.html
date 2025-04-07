@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Selected Team</title>
+  <style>
+    .top-right {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-right">
+    <form action="{% url 'home' %}" method="get">
+      <button type="submit">Go to Home Page</button>
+    </form>
+  </div>
+
+  <h2>Optimal Cricket Team</h2>
+  <ul>
+    {% for p in team %}
+      <li>
+        <strong>{{ p.name }}</strong> ({{ p.role }}) - Age: {{ p.age }},
+        Strike Rate: {{ p.strike_rate }}, Wickets: {{ p.wickets }},
+        Matches: {{ p.matches }}, Score: {{ p.total_score }},
+        High Score: {{ p.high_score }}
+      </li>
+    {% endfor %}
+  </ul>
+</body>
+</html>

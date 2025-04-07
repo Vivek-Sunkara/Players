@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Player</title>
+</head>
+<body>
+    <h1>Add Player</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Name:</label>
+        <input type="text" name="name" required><br>
+
+        <label>Age:</label>
+        <input type="number" name="age" required><br>
+
+        <label>Role:</label>
+        <select name="role" required>
+            <option value="batsman">Batsman</option>
+            <option value="bowler">Bowler</option>
+            <option value="allrounder">Allrounder</option>
+        </select><br>
+
+        <label>Strike Rate:</label>
+        <input type="number" name="strike_rate" required><br>
+
+        <label>Number of Wickets:</label>
+        <input type="number" name="wickets" required><br>
+
+        <label>Matches Played:</label>
+        <input type="number" name="matches" required><br>
+
+        <label>Total Score:</label>
+        <input type="number" name="total_score" required><br>
+
+        <label>High Score:</label>
+        <input type="number" name="high_score" required><br>
+
+        <button type="submit">Submit Player</button>
+    </form>
+
+    <hr>
+
+    <h2>All Players So Far</h2>
+    {% for player in players %}
+        <p><strong>{{ player.name }}</strong> | {{ player.role }} | Age: {{ player.age }}</p>
+    {% empty %}
+        <p>No players yet.</p>
+    {% endfor %}
+
+    <hr>
+
+    <form action="{% url 'generate_team' session_id %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Generate Team</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><title>Creator Form</title></head>
+<body>
+  <h2>Create Your Cricket Team</h2>
+  <form method="POST">
+    {% csrf_token %}
+    <label>Bowlers:</label><input type="number" name="bowlers" required><br>
+    <label>Batsmen:</label><input type="number" name="batsmen" required><br>
+    <label>All-Rounders:</label><input type="number" name="allrounders" required><br>
+    <button type="submit">Next</button>
+  </form>
+</body>
+</html>

@@ -1,24 +1,36 @@
-import pulp
-from .models import Player
+from collections import defaultdict
+from pulp import LpMaximize, LpProblem, LpVariable, lpSum
 
-def optimize_team(players, num_bowlers, num_batsmen):
-    # Define the problem
-    prob = pulp.LpProblem("OptimalCricketTeam", pulp.LpMaximize)
+def solve_lp(data, group_size=3):
+    students = list(range(len(data)))
+    groups = list(range(len(data) // group_size))
 
-    # Define decision variables
-    player_vars = pulp.LpVariable.dicts("Player", players, cat='Binary')
+    prob = LpProblem("StudyGroupBalancer", LpMaximize)
 
-    # Define the objective function (e.g., maximize total runs scored)
-    prob += pulp.lpSum([player.total_runs_scored * player_vars[player] for player in players])
+    x = {(i, g): LpVariable(f"x_{i}_{g}", cat='Binary') for i in students for g in groups}
 
-    # Define constraints based on creator's preferences
-    prob += pulp.lpSum([player_vars[player] for player in players if player.role == 'bowler']) == num_bowlers
-    prob += pulp.lpSum([player_vars[player] for player in players if player.role == 'batsman']) == num_batsmen
+    # 1. Each student is assigned to one group
+    for i in students:
+        prob += lpSum(x[i, g] for g in groups) == 1
 
-    # Solve the problem
+    # 2. Group size constraint
+    for g in groups:
+        prob += lpSum(x[i, g] for i in students) <= group_size
+
+    # 3. Maximize skill balance across groups
+    skill_balances = []
+    for g in groups:
+        group_skill = lpSum(x[i, g] * data[i]['skill'] for i in students)
+        skill_balances.append(group_skill)
+    prob += lpSum(skill_balances)
+
     prob.solve()
 
-    # Get the selected players
-    selected_players = [player for player in players if player_vars[player].varValue == 1]
+    # Group result
+    final_groups = defaultdict(list)
+    for i in students:
+        for g in groups:
+            if x[i, g].varValue == 1:
+                final_groups[g].append(data[i])
 
-    return selected_players
+    return dict(final_groups)

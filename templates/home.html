@@ -1,84 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    {% load static %}
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            background: url("{% static 'images/background.jpg' %}") no-repeat center center fixed;
-            background-size: cover;
-            font-family: Arial, sans-serif;
-            color: #f0f0f0;
-        }
-        nav {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 1em;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #ffcc00;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
-        }
-        .nav-links {
-            display: flex;
-            gap: 1em;
-        }
-        nav a {
-            color: #ffcc00;
-            text-decoration: none;
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-        nav a:hover {
-            color: #ff6600;
-            text-decoration: underline;
-        }
-        .container {
-            padding: 20px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            height: calc(100vh - 60px);
-        }
-        h1 {
-            font-size: 3em;
-            margin: 0.5em 0;
-            color: #ff6600;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-        }
-        p {
-            font-size: 1.5em;
-            color: #ffffff;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-        }
-    </style>
+  <title>Home</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .navbar { display: flex; justify-content: space-between; align-items: center; background: #eee; padding: 10px; }
+    .nav-links { display: flex; gap: 15px; }
+    .section { margin-top: 30px; border: 1px solid #ccc; padding: 15px; }
+    h2 { color: #333; }
+  </style>
 </head>
 <body>
 
-<nav>
-    <div class="logo">
-        <a href="{% url 'home' %}" style="text-decoration: none; color: #ffcc00;">PLAYER</a>
-    </div>
+  <div class="navbar">
     <div class="nav-links">
-        <a href="{% url 'login' %}">Login</a>
-        <a href="{% url 'register' %}">Register</a>
+      <a href="{% url 'home' %}">Home</a>
+      <a href="{% url 'creator_form' %}">Create a Team</a>
     </div>
-</nav>
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit">Logout</button>
+    </form>
+  </div>
 
-<div class="container">
-    <h1>Players</h1>
-    <p>Welcome to Players, where you can create the best team for any kind of sport!</p>
-</div>
+  <h1>Welcome, {{ username }}</h1>
+
+  <!-- Section 1: Previous Teams -->
+  <div class="section">
+    <h2>Your Previously Created Teams</h2>
+    {% if previous_teams %}
+      {% for team in previous_teams %}
+        <h3>Team ID: {{ team.session_id }}</h3>
+        <p><strong>Requirements:</strong> Bowlers - {{ team.requirements.bowlers }}, Batsmen - {{ team.requirements.batsmen }}, Allrounders - {{ team.requirements.allrounders }}</p>
+        <p><strong>All Players Who Applied:</strong></p>
+        <ul>
+          {% for p in team.players %}
+            <li>{{ p.name }} ({{ p.role }}) - Age: {{ p.age }}, SR: {{ p.strike_rate }}, Wickets: {{ p.wickets }}, Matches: {{ p.matches }}, Score: {{ p.total_score }}, High: {{ p.high_score }}</li>
+          {% endfor %}
+        </ul>
+        <p><strong>Final Team:</strong></p>
+        <ul>
+          {% for p in team.final_team %}
+            <li><b>{{ p.name }}</b> ({{ p.role }}) - SR: {{ p.strike_rate }}, Score: {{ p.total_score }}</li>
+          {% endfor %}
+        </ul>
+        <hr>
+      {% endfor %}
+    {% else %}
+      <p>No teams created yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- Section 2: Unique Players Across All Your Teams -->
+  <div class="section">
+    <h2>All Unique Players Who Applied to Your Teams</h2>
+    {% if unique_players %}
+      <ul>
+        {% for p in unique_players %}
+          <li>{{ p.name }} ({{ p.role }}) - Age: {{ p.age }}, SR: {{ p.strike_rate }}, Wickets: {{ p.wickets }}, Matches: {{ p.matches }}, Score: {{ p.total_score }}, High: {{ p.high_score }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No players have applied yet.</p>
+    {% endif %}
+  </div>
 
 </body>
 </html>

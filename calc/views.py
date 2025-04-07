@@ -1,233 +1,179 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from scipy.optimize import linprog
+import uuid
 
-from django.contrib.auth.forms import UserCreationForm
-from django.urls import reverse
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from .models import Player, Team, Creator
-from .forms import TeamForm, PlayerForm, CreatorForm
-from .utils import optimize_team 
-from django.http import Http404
-from django.http import JsonResponse
-from django.contrib import messages
-import logging
-from django.views.decorators.http import require_POST
-
-
-@login_required
-def delete_player(request, player_id):
-    """
-    Deletes a specific player.
-    """
-    player = get_object_or_404(Player, id=player_id, team__creator=request.user)
-
-    if request.method == 'POST':
-        player.delete()
-        return redirect('profile')
-
-    return redirect('profile')
-@require_POST
-@login_required
-def delete_all_players(request, team_id):
-    """
-    Permanently deletes all players belonging to a specific team
-    """
-    try:
-        team = get_object_or_404(Team, id=team_id, creator=request.user)
-        count, _ = Player.objects.filter(team=team).delete()
-        messages.success(request, f'Successfully deleted {count} players.')
-        return JsonResponse({'status': 'success', 'deleted_count': count})
-    except Exception as e:
-        logger.error(f"Error deleting players: {str(e)}")
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-def player_form(request, unique_link):
-    """
-    Displays the player form for a specific team.
-    The unique link is also displayed on the page.
-    """
-    team = get_object_or_404(Team, unique_link=unique_link)
-    players = Player.objects.filter(team=team)
-
-    if request.method == 'POST':
-        form = PlayerForm(request.POST)
-        if form.is_valid():
-            player = form.save(commit=False)
-            player.team = team
-            player.save()
-            return redirect(reverse('player_form', kwargs={'unique_link': unique_link}))
-    else:
-        form = PlayerForm()
-
-    context = {
-        'form': form,
-        'players': players,
-        'creator': team.creator,
-        'unique_link': request.build_absolute_uri(reverse('player_form', kwargs={'unique_link': unique_link})),
-    }
-    return render(request, 'player_form.html', context)
-@login_required
-def create_team_view(request):
-    if request.method == 'POST':
-        form = TeamForm(request.POST)
-        if form.is_valid():
-            team = form.save(commit=False)
-
-            # Ensure a Creator instance is linked to the user
-            creator, created = Creator.objects.get_or_create(
-                user=request.user, 
-                defaults={'name': request.user.username}
-            )
-
-            team.creator = creator.user  # ✅ Assign the User instance
-            team.save()
-
-            unique_link = request.build_absolute_uri(reverse('player_form', kwargs={'unique_link': team.unique_link}))
-
-            context = {
-                'team': team,
-                'unique_link': unique_link,
-            }
-            return render(request, 'team_success.html', context)
-    else:
-        form = TeamForm()
-
-    return render(request, 'create_team.html', {'form': form})
-
-@login_required
-def add_players(request, team_id):
-    """
-    Allows users to add players to a specific team.
-    """
-    team = get_object_or_404(Team, id=team_id, creator=request.user)
-    creator = team.creator  # Ensure creator is retrieved from the team
-
-    if request.method == 'POST':
-        form = PlayerForm(request.POST)
-        if form.is_valid():
-            player = form.save(commit=False)
-            player.team = team
-            player.creator = creator  # Assign the actual Creator instance
-            player.save()
-            return redirect(reverse('add_players', kwargs={'team_id': team.id}))
-
-    else:
-        form = PlayerForm()
-
-    players = Player.objects.filter(team=team)
-
-    # Generate the unique link for the team
-    unique_link = request.build_absolute_uri(reverse('player_form', kwargs={'unique_link': team.unique_link}))
-
-    # Ensure we pass the correct optimize team URL
-    optimize_url = reverse('optimize_team_with_id', args=[creator.id])
-
-    context = {
-        'form': form,
-        'players': players,
-        'team': team,
-        'creator': creator,
-        'unique_link': unique_link,
-        'optimize_url': optimize_url,  # Pass correct optimize team URL
-    }
-    return render(request, 'add_players.html', context)
-def player_form_view(request, unique_link):
-    """
-    Displays the player form for a specific Creator.
-    """
-    creator = get_object_or_404(Creator, unique_link=unique_link)
-    players = Player.objects.filter(creator=creator)
-
-    if request.method == 'POST':
-        form = PlayerForm(request.POST)
-        if form.is_valid():
-            player = form.save(commit=False)
-            player.creator = creator
-            player.save()
-            return redirect(reverse('player_form_view', kwargs={'unique_link': unique_link}))
-    else:
-        form = PlayerForm()
-
-    context = {
-        'form': form,
-        'creator': creator,
-        'players': players,
-    }
-    return render(request, 'player_form.html', context)
-
-@login_required
-def optimize_team_view(request, creator_id=None):
-    if creator_id:
-        creator = get_object_or_404(Creator, id=creator_id)
-    else:
-        user = request.user  # Get the logged-in User instance
-        creator, created = Creator.objects.get_or_create(
-            user=user, 
-            defaults={'name': user.username}
-        )
-
-    # ✅ Ensure `creator.user` is a User instance before filtering
-    if not isinstance(creator.user, User):
-        raise ValueError(f"Invalid user associated with Creator: {creator.user}")
-
-    # ✅ Fix the query by using `creator` (not `creator.user`)
-    players = Player.objects.filter(team__creator=creator)
-
-    if not players.exists():
-        return render(request, "error_page.html", {"message": "No players found for this creator."})
-
-    optimized_team = optimize_team(players, creator.num_bowlers, creator.num_batsmen)
-
-    return render(request, 'optimal_team.html', {'creator': creator, 'optimal_team': optimized_team})
-@login_required
-def create_team(request):
-    """
-    Handles team creation and redirects users to add players.
-    """
-    if request.method == 'POST':
-        form = TeamForm(request.POST)
-        if form.is_valid():
-            team = form.save(commit=False)
-            team.creator = request.user
-            team.save()
-            return redirect(reverse('add_players', kwargs={'team_id': team.id}))
-    else:
-        form = TeamForm()
-
-    return render(request, 'create_team.html', {'form': form})
-
-def home(request):
-    """
-    Renders the home page.
-    """
-    return render(request, 'home.html', {'name': 'Raju'})
-
-@login_required
-def profile_view(request):
-    """
-    Displays the profile page with all players belonging to the logged-in user's team.
-    """
-    players = Player.objects.filter(team__creator=request.user)
-    return render(request, 'profile.html', {'players': players})
-
-def player_detail_view(request, player_id):
-    """
-    Displays details of a specific player.
-    """
-    player = get_object_or_404(Player, id=player_id)
-    return render(request, 'player_detail.html', {'player': player})
+# ===================== AUTHENTICATION =====================
 
 def register(request):
-    """
-    Handles user registration and redirects to the profile page upon successful sign-up.
-    """
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect(reverse('profile'))
-    else:
-        form = UserCreationForm()
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        users = request.session.get('users', {})
 
-    return render(request, 'register.html', {'form': form})
+        if username in users:
+            return HttpResponse("Username already exists.")
+
+        users[username] = password
+        request.session['users'] = users
+        return redirect('login')
+    return render(request, 'register.html')
+
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        users = request.session.get('users', {})
+
+        if username in users and users[username] == password:
+            request.session['logged_in'] = True
+            request.session['username'] = username
+            return redirect('home')
+        else:
+            return HttpResponse("Invalid credentials.")
+    return render(request, 'login.html')
+
+
+def logout_view(request):
+    request.session.flush()
+    return redirect('login')
+
+# ===================== CREATOR FORM =====================
+
+def creator_form(request):
+    if not request.session.get('logged_in'):
+        return redirect('login')
+
+    if request.method == 'POST':
+        session_id = 'session-' + str(uuid.uuid4())
+        request.session['current_session_id'] = session_id
+        request.session[session_id] = {
+            'created_by': request.session['username'],
+            'role_requirements': {
+                'bowlers': int(request.POST.get('bowlers')),
+                'batsmen': int(request.POST.get('batsmen')),
+                'allrounders': int(request.POST.get('allrounders')),
+            },
+            'players': [],
+            'final_team': []
+        }
+        return redirect('add_player', session_id=session_id)
+
+    return render(request, 'creatorform.html')
+
+
+# ===================== ADD PLAYER =====================
+
+def add_player(request, session_id):
+    if session_id not in request.session:
+        return HttpResponse("Invalid session.")
+
+    if request.method == 'POST':
+        player = {
+            'name': request.POST.get('name'),
+            'age': int(request.POST.get('age')),
+            'role': request.POST.get('role'),
+            'strike_rate': float(request.POST.get('strike_rate')),
+            'wickets': int(request.POST.get('wickets')),
+            'matches': int(request.POST.get('matches')),
+            'total_score': int(request.POST.get('total_score')),
+            'high_score': int(request.POST.get('high_score'))
+        }
+
+        session_data = request.session[session_id]
+        session_data['players'].append(player)
+        request.session[session_id] = session_data
+
+    players = request.session[session_id]['players']
+    return render(request, 'addplayer.html', {'session_id': session_id, 'players': players})
+
+
+# ===================== GENERATE TEAM =====================
+
+def generate_team(request, session_id):
+    if not request.session.get('logged_in'):
+        return redirect('login')
+
+    data = request.session.get(session_id, {})
+    players = data.get('players', [])
+    requirements = data.get('role_requirements', {})
+
+    if not players or not requirements:
+        return HttpResponse("Missing data.")
+
+    def compute_skill(p):
+        return (p['strike_rate'] * 0.2 + p['wickets'] * 0.3 +
+                p['matches'] * 0.1 + p['total_score'] * 0.3 +
+                p['high_score'] * 0.1)
+
+    skills = [compute_skill(p) for p in players]
+    n = len(players)
+    c = [-s for s in skills]
+
+    A_eq = [
+        [1 if p['role'] == 'bowler' else 0 for p in players],
+        [1 if p['role'] == 'batsman' else 0 for p in players],
+        [1 if p['role'] == 'allrounder' else 0 for p in players],
+    ]
+    b_eq = [
+        requirements.get('bowlers', 0),
+        requirements.get('batsmen', 0),
+        requirements.get('allrounders', 0),
+    ]
+    bounds = [(0, 1) for _ in range(n)]
+
+    res = linprog(c=c, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method='highs')
+
+    selected_players = []
+    if res.success:
+        for i, val in enumerate(res.x):
+            if val > 0.99:
+                selected_players.append(players[i])
+    else:
+        return HttpResponse("No valid team found. Please check inputs.")
+
+    data['final_team'] = selected_players
+    request.session[session_id] = data
+
+    return render(request, 'team.html', {'team': selected_players})
+
+
+# ===================== HOME PAGE =====================
+
+def home_view(request):
+    if not request.session.get('logged_in'):
+        return redirect('login')
+
+    username = request.session.get('username')
+    all_session_keys = list(request.session.keys())
+
+    previous_teams = []
+    unique_players = []
+    seen_players = set()
+
+    for key in all_session_keys:
+        if key.startswith('session-') and request.session[key].get('created_by') == username:
+            session_data = request.session[key]
+            players = session_data.get('players', [])
+            unique_for_this_team = []
+
+            for p in players:
+                player_key = (p['name'], p['age'], p['role'])
+                if player_key not in seen_players:
+                    seen_players.add(player_key)
+                    unique_players.append(p)
+                unique_for_this_team.append(p)
+
+            previous_teams.append({
+                'session_id': key,
+                'requirements': session_data.get('role_requirements'),
+                'players': unique_for_this_team,
+                'final_team': session_data.get('final_team', [])
+            })
+
+    return render(request, 'home.html', {
+        'username': username,
+        'previous_teams': previous_teams,
+        'unique_players': unique_players
+    })
