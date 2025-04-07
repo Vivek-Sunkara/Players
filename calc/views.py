@@ -177,3 +177,5 @@ def home_view(request):
         'previous_teams': previous_teams,
         'unique_players': unique_players
     })
+def base_page(request):
+    return render(request, 'base.html')
