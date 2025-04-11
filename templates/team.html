@@ -1,128 +1,512 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Selected Team</title>
+  <title>CricZone - Selected Team</title>
   <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      background: linear-gradient(135deg, #090c16 0%, #171e3c 100%);
+      color: #e6edf3;
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+      position: relative;
+      overflow-x: hidden;
+      padding: 20px;
+    }
+    
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('https://i.imgur.com/KV3t1MK.png') center/40px repeat;
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    /* Glowing accent line */
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00dbde, #fc00ff, #00dbde, transparent);
+      background-size: 200% 100%;
+      animation: flowingGradient 8s linear infinite;
+      z-index: 1000;
+    }
+    
+    @keyframes flowingGradient {
+      0% { background-position: 0% 0; }
+      100% { background-position: 200% 0; }
+    }
+    
+    /* Navbar styles */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(22, 27, 34, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 18px 30px;
+      border-radius: 16px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(100, 255, 218, 0.1);
+      box-shadow: 0 8px 32px rgba(0, 219, 222, 0.15);
+      position: relative;
+      z-index: 100;
+      overflow: hidden;
+    }
+    
+    .navbar::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(252, 0, 255, 0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      z-index: -1;
+      pointer-events: none;
+    }
+    
+    .navbar:hover::before {
+      opacity: 1;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .nav-links a {
+      color: #e6edf3;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 30px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      letter-spacing: 0.5px;
+      z-index: 1;
+    }
+
+    .nav-links a::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+      border-radius: 30px;
+    }
+
+    .nav-links a:hover {
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 219, 222, 0.3);
+    }
+
+    .nav-links a:hover::before {
+      opacity: 1;
+    }
+
+    button {
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      box-shadow: 0 5px 15px rgba(252, 0, 255, 0.3);
+      letter-spacing: 0.5px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+    }
+
+    button::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #fc00ff, #00dbde);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      z-index: -1;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(252, 0, 255, 0.4);
+    }
+
+    button:hover::before {
+      opacity: 1;
+    }
+
+    button:active {
+      transform: translateY(-1px);
+    }
+    
+    /* Page title */
+    h1, h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 42px;
+      font-weight: 800;
+      margin-bottom: 30px;
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 5px 15px rgba(252, 0, 255, 0.3);
+      letter-spacing: 2px;
+      position: relative;
+      display: inline-block;
+      animation: fadeIn 1s ease-out forwards;
+    }
+    
+    h2 {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    h1::after, h2::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 100px;
+      height: 3px;
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      border-radius: 2px;
+    }
+    
+    /* Section styles */
+    .section {
+      background: rgba(22, 27, 34, 0.85);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 
+                  0 0 0 1px rgba(100, 255, 218, 0.1),
+                  0 0 30px rgba(0, 219, 222, 0.1);
+      position: relative;
+      overflow: hidden;
+      z-index: 10;
+      animation: fadeIn 1s ease-out forwards;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    
+    .section:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                  0 0 0 1px rgba(100, 255, 218, 0.2),
+                  0 0 30px rgba(0, 219, 222, 0.2);
+    }
+    
+    .section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      animation: shimmer 3s infinite linear;
+      background-size: 200% 100%;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 0% 0; }
+      100% { background-position: 200% 0; }
+    }
+    
+    /* Team List Styles */
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+
+    li {
+      padding: 16px 20px;
+      margin-bottom: 15px;
+      background: rgba(13, 17, 23, 0.6);
+      border-radius: 12px;
+      border-left: 4px solid;
+      border-image: linear-gradient(to bottom, #00dbde, #fc00ff) 1;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      animation: fadeIn 0.5s ease-out forwards;
+      animation-delay: calc(0.1s * var(--i, 0));
+    }
+
+    li:hover {
+      transform: translateX(5px);
+      box-shadow: 0 8px 20px rgba(0, 219, 222, 0.2);
+      background: rgba(13, 17, 23, 0.8);
+    }
+
+    li strong {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 600;
+      color: #fff;
+      margin-right: 8px;
+      letter-spacing: 0.5px;
+    }
+    
+    li .role {
+      display: inline-block;
+      padding: 4px 10px;
+      background: linear-gradient(90deg, rgba(0, 219, 222, 0.2), rgba(252, 0, 255, 0.2));
+      border-radius: 20px;
+      font-size: 0.9em;
+      margin: 0 10px;
+    }
+
+    li .stats {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      font-size: 0.9em;
+      color: #a0aec0;
+    }
+
+    li .stat {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    li .stat i {
+      color: #00dbde;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Background animation elements */
+    .bg-circle {
+      position: fixed;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 219, 222, 0.08) 0%, transparent 70%);
+      animation: pulse 15s infinite alternate;
+      z-index: -1;
+    }
+    
+    .bg-circle:nth-child(1) {
+      width: 600px;
+      height: 600px;
+      top: -200px;
+      left: -200px;
+      animation-delay: 0s;
+    }
+    
+    .bg-circle:nth-child(2) {
+      width: 500px;
+      height: 500px;
+      bottom: -150px;
+      right: -150px;
+      background: radial-gradient(circle, rgba(252, 0, 255, 0.08) 0%, transparent 70%);
+      animation-delay: 5s;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.3); opacity: 0.5; }
+      100% { transform: scale(1); opacity: 0.3; }
+    }
+
+    /* Footer with glow effect */
+    footer {
+      text-align: center;
+      padding: 25px;
+      background: rgba(22, 27, 34, 0.8);
+      backdrop-filter: blur(10px);
+      color: #8b949e;
+      margin-top: auto;
+      font-size: 14px;
+      border-top: 1px solid rgba(100, 255, 218, 0.1);
+      position: relative;
+      overflow: hidden;
+      z-index: 10;
+      border-radius: 16px;
+    }
+
+    footer::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #00dbde, #fc00ff, #00dbde, transparent);
+      animation: shimmer 3s infinite linear;
+      background-size: 200% 100%;
+    }
+
+    /* Cricket ball animation */
+    .cricket-ball {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      background: radial-gradient(circle at 40% 40%, #fc00ff, #c2185b);
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(252, 0, 255, 0.5);
+      z-index: -1;
+      opacity: 0.4;
+    }
+
+    .cricket-ball:nth-child(1) {
+      top: 15%;
+      left: 10%;
+      animation: bounce 20s infinite ease-in-out;
+    }
+
+    .cricket-ball:nth-child(2) {
+      top: 70%;
+      right: 5%;
+      animation: bounce 25s infinite ease-in-out reverse;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(200px, -100px); }
+      50% { transform: translate(400px, 0); }
+      75% { transform: translate(200px, 100px); }
+    }
+    
     .top-right {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
     }
-            /* DARK THEME STYLES - Global */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-        body {
-          background-color: #0d1117;
-          color: #e6edf3;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          padding: 20px;
-          line-height: 1.6;
-        }
-    
-        a {
-          color: #58a6ff;
-          text-decoration: none;
-          transition: color 0.3s ease;
-        }
-    
-        a:hover {
-          color: #1f6feb;
-        }
-    
-        h1, h2, h3 { color: #e6edf3; margin-bottom: 10px; }
-    
-        .navbar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          background: #161b22;
-          padding: 15px 20px;
-          border-radius: 10px;
-          box-shadow: 0 0 10px rgba(100, 149, 237, 0.1);
-        }
-    
-        .nav-links {
-          display: flex;
-          gap: 20px;
-        }
-    
-        .nav-links a {
-          font-weight: 500;
-          padding: 8px 12px;
-          border-radius: 6px;
-          transition: background 0.3s, transform 0.3s;
-        }
-    
-        .nav-links a:hover {
-          background: #21262d;
-          transform: scale(1.05);
-        }
-    
-        button {
-          background-color: #238636;
-          color: white;
-          border: none;
-          padding: 8px 14px;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: background 0.3s ease, transform 0.3s ease;
-        }
-    
-        button:hover {
-          background-color: #2ea043;
-          transform: scale(1.03);
-        }
-    
-        .section {
-          background: #161b22;
-          margin-top: 30px;
-          padding: 20px;
-          border-radius: 12px;
-          box-shadow: 0 0 10px rgba(100, 149, 237, 0.05);
-          transition: transform 0.3s, box-shadow 0.3s;
-        }
-    
-        .section:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 0 20px rgba(100, 149, 237, 0.15);
-        }
-    
-        ul {
-          list-style: none;
-          padding-left: 0;
-          margin-top: 10px;
-        }
-    
-        ul li {
-          padding: 6px 0;
-          border-bottom: 1px solid #30363d;
-        }
-    
-        hr {
-          border: none;
-          border-top: 1px solid #30363d;
-          margin: 20px 0;
-        }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        gap: 15px;
+      }
       
+      .nav-links {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .section {
+        padding: 20px;
+      }
+      
+      h1, h2 {
+        font-size: 28px;
+      }
+      
+      li {
+        padding: 12px;
+      }
+      
+      li .stats {
+        flex-direction: column;
+        gap: 5px;
+      }
+    }
   </style>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-  <div class="top-right">
-    <form action="{% url 'home' %}" method="get">
-      <button type="submit">Go to Home Page</button>
+  <!-- Background animation elements -->
+  <div class="bg-circle"></div>
+  <div class="bg-circle"></div>
+  <div class="cricket-ball"></div>
+  <div class="cricket-ball"></div>
+
+  <div class="navbar">
+    <div class="nav-links">
+      <a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
+      <a href="{% url 'creator_form' %}"><i class="fas fa-users"></i> Create a Team</a>
+    </div>
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </form>
   </div>
 
-  <h2>Optimal Cricket Team</h2>
-  <ul>
-    {% for p in team %}
-      <li>
-        <strong>{{ p.name }}</strong> ({{ p.role }}) - Age: {{ p.age }},
-        Strike Rate: {{ p.strike_rate }}, Wickets: {{ p.wickets }},
-        Matches: {{ p.matches }}, Score: {{ p.total_score }},
-        High Score: {{ p.high_score }}
-      </li>
-    {% endfor %}
-  </ul>
+  <h1><i class="fas fa-trophy"></i> Your Optimal Cricket Team</h1>
+
+  <div class="section">
+    <h2><i class="fas fa-users"></i> Selected Players</h2>
+    <ul>
+      {% for p in team %}
+        <li style="--i: {{ forloop.counter }}">
+          <strong>{{ p.name }}</strong>
+          <span class="role">{{ p.role }}</span>
+          
+          <div class="stats">
+            <span class="stat"><i class="fas fa-birthday-cake"></i> Age: {{ p.age }}</span>
+            <span class="stat"><i class="fas fa-bolt"></i> Strike Rate: {{ p.strike_rate }}</span>
+            <span class="stat"><i class="fas fa-bullseye"></i> Wickets: {{ p.wickets }}</span>
+            <span class="stat"><i class="fas fa-gamepad"></i> Matches: {{ p.matches }}</span>
+            <span class="stat"><i class="fas fa-chart-line"></i> Total Score: {{ p.total_score }}</span>
+            <span class="stat"><i class="fas fa-medal"></i> High Score: {{ p.high_score }}</span>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+  
+  <div class="section">
+    <h2><i class="fas fa-chart-pie"></i> Team Overview</h2>
+    <p>Your selected team has been optimized based on player statistics and your specified requirements. This balanced team composition ensures optimal performance in all aspects of the game.</p>
+    
+    <div class="button-container" style="margin-top: 20px; text-align: center;">
+      <button onclick="window.location.href='{% url 'creator_form' %}'">
+        <i class="fas fa-redo"></i> Create Another Team
+      </button>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 CricZone. All rights reserved. | The ultimate cricket team management platform
+  </footer>
+
 </body>
 </html>

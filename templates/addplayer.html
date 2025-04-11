@@ -1,158 +1,622 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Player</title>
-  
-       
-        <style>
-          /* DARK THEME STYLES - Global */
-          * { margin: 0; padding: 0; box-sizing: border-box; }
+  <title>CricZone - Add Player</title>
+  <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      background: linear-gradient(135deg, #090c16 0%, #171e3c 100%);
+      color: #e6edf3;
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+      position: relative;
+      overflow-x: hidden;
+      padding: 20px;
+    }
+    
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('https://i.imgur.com/KV3t1MK.png') center/40px repeat;
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    /* Glowing accent line */
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00dbde, #fc00ff, #00dbde, transparent);
+      background-size: 200% 100%;
+      animation: flowingGradient 8s linear infinite;
+      z-index: 1000;
+    }
+    
+    @keyframes flowingGradient {
+      0% { background-position: 0% 0; }
+      100% { background-position: 200% 0; }
+    }
+    
+    /* Navbar styles */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(22, 27, 34, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 18px 30px;
+      border-radius: 16px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(100, 255, 218, 0.1);
+      box-shadow: 0 8px 32px rgba(0, 219, 222, 0.15);
+      position: relative;
+      z-index: 100;
+      overflow: hidden;
+    }
+    
+    .navbar::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(252, 0, 255, 0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      z-index: -1;
+      pointer-events: none;
+    }
+    
+    .navbar:hover::before {
+      opacity: 1;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .nav-links a {
+      color: #e6edf3;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 30px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      letter-spacing: 0.5px;
+      z-index: 1;
+    }
+
+    .nav-links a::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+      border-radius: 30px;
+    }
+
+    .nav-links a:hover {
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 219, 222, 0.3);
+    }
+
+    .nav-links a:hover::before {
+      opacity: 1;
+    }
+
+    button {
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      box-shadow: 0 5px 15px rgba(252, 0, 255, 0.3);
+      letter-spacing: 0.5px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+    }
+
+    button::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #fc00ff, #00dbde);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      z-index: -1;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(252, 0, 255, 0.4);
+    }
+
+    button:hover::before {
+      opacity: 1;
+    }
+
+    button:active {
+      transform: translateY(-1px);
+    }
+    
+    /* Page title */
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 42px;
+      font-weight: 800;
+      margin-bottom: 30px;
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 5px 15px rgba(252, 0, 255, 0.3);
+      letter-spacing: 2px;
+      position: relative;
+      display: inline-block;
+      animation: fadeIn 1s ease-out forwards;
+    }
+
+    h1::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 100px;
+      height: 3px;
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      border-radius: 2px;
+    }
+    
+    /* Section styles */
+    .section {
+      background: rgba(22, 27, 34, 0.85);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 
+                  0 0 0 1px rgba(100, 255, 218, 0.1),
+                  0 0 30px rgba(0, 219, 222, 0.1);
+      position: relative;
+      overflow: hidden;
+      z-index: 10;
+      animation: fadeIn 1s ease-out forwards;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    
+    .section:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                  0 0 0 1px rgba(100, 255, 218, 0.2),
+                  0 0 30px rgba(0, 219, 222, 0.2);
+    }
+    
+    .section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      animation: shimmer 3s infinite linear;
+      background-size: 200% 100%;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 0% 0; }
+      100% { background-position: 200% 0; }
+    }
+    
+    .section h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #e6edf3;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .section h2::after {
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 50px;
+      height: 2px;
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      border-radius: 2px;
+    }
+    
+    /* Form styles */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .form-group {
+      position: relative;
+      margin-bottom: 5px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #e6edf3;
+      letter-spacing: 0.5px;
+    }
+    
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 14px;
+      background: rgba(13, 17, 23, 0.8);
+      border: 1px solid rgba(100, 255, 218, 0.2);
+      border-radius: 10px;
+      color: #e6edf3;
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #00dbde;
+      box-shadow: 0 5px 20px rgba(0, 219, 222, 0.3);
+    }
+    
+    input[type="text"]:hover,
+    input[type="number"]:hover,
+    select:hover {
+      border-color: rgba(100, 255, 218, 0.5);
+    }
+    
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300dbde' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 15px center;
+      background-size: 16px;
+      padding-right: 45px;
+    }
+    
+    .submit-btn {
+      margin-top: 10px;
+      align-self: flex-start;
+    }
+    
+    /* Player list */
+    .player-list {
+      margin-top: 20px;
+    }
+    
+    .player-item {
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      background: rgba(13, 17, 23, 0.6);
+      border-radius: 10px;
+      border-left: 3px solid rgba(0, 219, 222, 0.5);
+      transition: all 0.3s ease;
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    .player-item:hover {
+      border-left-color: #fc00ff;
+      background: rgba(13, 17, 23, 0.8);
+      transform: translateX(5px);
+    }
+    
+    .player-name {
+      font-weight: 600;
+      color: #e6edf3;
+    }
+    
+    .player-role {
+      display: inline-block;
+      padding: 3px 10px;
+      margin-left: 10px;
+      background: linear-gradient(90deg, rgba(0, 219, 222, 0.2), rgba(252, 0, 255, 0.2));
+      border-radius: 30px;
+      font-size: 12px;
+      color: #e6edf3;
+    }
+    
+    .player-age {
+      opacity: 0.8;
+      font-size: 14px;
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid rgba(100, 255, 218, 0.1);
+      margin: 25px 0;
+    }
+    
+    .generate-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 15px 30px;
+      font-size: 16px;
+      letter-spacing: 1px;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Background animation elements */
+    .bg-circle {
+      position: fixed;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 219, 222, 0.08) 0%, transparent 70%);
+      animation: pulse 15s infinite alternate;
+      z-index: -1;
+    }
+    
+    .bg-circle:nth-child(1) {
+      width: 600px;
+      height: 600px;
+      top: -200px;
+      left: -200px;
+      animation-delay: 0s;
+    }
+    
+    .bg-circle:nth-child(2) {
+      width: 500px;
+      height: 500px;
+      bottom: -150px;
+      right: -150px;
+      background: radial-gradient(circle, rgba(252, 0, 255, 0.08) 0%, transparent 70%);
+      animation-delay: 5s;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.3); opacity: 0.5; }
+      100% { transform: scale(1); opacity: 0.3; }
+    }
+
+    /* Footer with glow effect */
+    footer {
+      text-align: center;
+      padding: 25px;
+      background: rgba(22, 27, 34, 0.8);
+      backdrop-filter: blur(10px);
+      color: #8b949e;
+      margin-top: auto;
+      font-size: 14px;
+      border-top: 1px solid rgba(100, 255, 218, 0.1);
+      position: relative;
+      overflow: hidden;
+      z-index: 10;
+      border-radius: 16px;
+    }
+
+    footer::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #00dbde, #fc00ff, #00dbde, transparent);
+      animation: shimmer 3s infinite linear;
+      background-size: 200% 100%;
+    }
+
+    /* Cricket ball animation */
+    .cricket-ball {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      background: radial-gradient(circle at 40% 40%, #fc00ff, #c2185b);
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(252, 0, 255, 0.5);
+      z-index: -1;
+      opacity: 0.4;
+    }
+
+    .cricket-ball:nth-child(1) {
+      top: 15%;
+      left: 10%;
+      animation: bounce 20s infinite ease-in-out;
+    }
+
+    .cricket-ball:nth-child(2) {
+      top: 70%;
+      right: 5%;
+      animation: bounce 25s infinite ease-in-out reverse;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(200px, -100px); }
+      50% { transform: translate(400px, 0); }
+      75% { transform: translate(200px, 100px); }
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        gap: 15px;
+      }
       
-          body {
-            background-color: #0d1117;
-            color: #e6edf3;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
-            line-height: 1.6;
-          }
+      .nav-links {
+        width: 100%;
+        justify-content: center;
+      }
       
-          a {
-            color: #58a6ff;
-            text-decoration: none;
-            transition: color 0.3s ease;
-          }
+      .section {
+        padding: 20px;
+      }
       
-          a:hover {
-            color: #1f6feb;
-          }
+      h1 {
+        font-size: 32px;
+      }
       
-          h1, h2, h3 { color: #e6edf3; margin-bottom: 10px; }
+      .section h2 {
+        font-size: 20px;
+      }
       
-          .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #161b22;
-            padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(100, 149, 237, 0.1);
-          }
-      
-          .nav-links {
-            display: flex;
-            gap: 20px;
-          }
-      
-          .nav-links a {
-            font-weight: 500;
-            padding: 8px 12px;
-            border-radius: 6px;
-            transition: background 0.3s, transform 0.3s;
-          }
-      
-          .nav-links a:hover {
-            background: #21262d;
-            transform: scale(1.05);
-          }
-      
-          button {
-            background-color: #238636;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.3s ease, transform 0.3s ease;
-          }
-      
-          button:hover {
-            background-color: #2ea043;
-            transform: scale(1.03);
-          }
-      
-          .section {
-            background: #161b22;
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 0 10px rgba(100, 149, 237, 0.05);
-            transition: transform 0.3s, box-shadow 0.3s;
-          }
-      
-          .section:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0 20px rgba(100, 149, 237, 0.15);
-          }
-      
-          ul {
-            list-style: none;
-            padding-left: 0;
-            margin-top: 10px;
-          }
-      
-          ul li {
-            padding: 6px 0;
-            border-bottom: 1px solid #30363d;
-          }
-      
-          hr {
-            border: none;
-            border-top: 1px solid #30363d;
-            margin: 20px 0;
-          }
-        </style>
-      
+      input[type="text"],
+      input[type="number"],
+      select {
+        padding: 12px;
+      }
+    }
+  </style>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <h1>Add Player</h1>
+  <!-- Background animation elements -->
+  <div class="bg-circle"></div>
+  <div class="bg-circle"></div>
+  <div class="cricket-ball"></div>
+  <div class="cricket-ball"></div>
 
+  <div class="navbar">
+    <div class="nav-links">
+      <a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
+      <a href="{% url 'creator_form' %}"><i class="fas fa-users"></i> Create a Team</a>
+    </div>
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </form>
+  </div>
+
+  <h1><i class="fas fa-user-plus"></i> Add Player</h1>
+
+  <div class="section">
+    <h2><i class="fas fa-id-card"></i> Player Details</h2>
+    <p>Complete the form below to add a new player to your draft pool.</p>
+    
     <form method="post">
-        {% csrf_token %}
-        <label>Name:</label>
-        <input type="text" name="name" required><br>
-
-        <label>Age:</label>
-        <input type="number" name="age" required><br>
-
-        <label>Role:</label>
-        <select name="role" required>
-            <option value="batsman">Batsman</option>
-            <option value="bowler">Bowler</option>
-            <option value="allrounder">Allrounder</option>
-        </select><br>
-
-        <label>Strike Rate:</label>
-        <input type="number" name="strike_rate" required><br>
-
-        <label>Number of Wickets:</label>
-        <input type="number" name="wickets" required><br>
-
-        <label>Matches Played:</label>
-        <input type="number" name="matches" required><br>
-
-        <label>Total Score:</label>
-        <input type="number" name="total_score" required><br>
-
-        <label>High Score:</label>
-        <input type="number" name="high_score" required><br>
-
-        <button type="submit">Submit Player</button>
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="name"><i class="fas fa-user"></i> Player Name:</label>
+        <input type="text" id="name" name="name" required placeholder="Enter player's full name">
+      </div>
+      
+      <div class="form-group">
+        <label for="age"><i class="fas fa-calendar-alt"></i> Age:</label>
+        <input type="number" id="age" name="age" min="16" max="45" required placeholder="Enter player's age">
+      </div>
+      
+      <div class="form-group">
+        <label for="role"><i class="fas fa-user-tag"></i> Role:</label>
+        <select id="role" name="role" required>
+          <option value="" disabled selected>Select player's role</option>
+          <option value="batsman">Batsman</option>
+          <option value="bowler">Bowler</option>
+          <option value="allrounder">Allrounder</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="strike_rate"><i class="fas fa-bolt"></i> Strike Rate:</label>
+        <input type="number" id="strike_rate" name="strike_rate" min="0" step="0.01" required placeholder="Enter player's strike rate">
+      </div>
+      
+      <div class="form-group">
+        <label for="wickets"><i class="fas fa-bullseye"></i> Number of Wickets:</label>
+        <input type="number" id="wickets" name="wickets" min="0" required placeholder="Enter total wickets taken">
+      </div>
+      
+      <div class="form-group">
+        <label for="matches"><i class="fas fa-clipboard-list"></i> Matches Played:</label>
+        <input type="number" id="matches" name="matches" min="0" required placeholder="Enter total matches played">
+      </div>
+      
+      <div class="form-group">
+        <label for="total_score"><i class="fas fa-chart-line"></i> Total Score:</label>
+        <input type="number" id="total_score" name="total_score" min="0" required placeholder="Enter player's total runs scored">
+      </div>
+      
+      <div class="form-group">
+        <label for="high_score"><i class="fas fa-mountain"></i> High Score:</label>
+        <input type="number" id="high_score" name="high_score" min="0" required placeholder="Enter player's highest score in a match">
+      </div>
+      
+      <button type="submit" class="submit-btn"><i class="fas fa-plus-circle"></i> Submit Player</button>
     </form>
+  </div>
 
-    <hr>
+  <div class="section">
+    <h2><i class="fas fa-list"></i> All Players So Far</h2>
+    <div class="player-list">
+      {% for player in players %}
+        <div class="player-item">
+          <span class="player-name">{{ player.name }}</span>
+          <span class="player-role">{{ player.role }}</span>
+          <span class="player-age">Age: {{ player.age }}</span>
+        </div>
+      {% empty %}
+        <p><i class="fas fa-info-circle"></i> No players have been added yet. Start building your draft pool!</p>
+      {% endfor %}
+    </div>
+  </div>
 
-    <h2>All Players So Far</h2>
-    {% for player in players %}
-        <p><strong>{{ player.name }}</strong> | {{ player.role }} | Age: {{ player.age }}</p>
-    {% empty %}
-        <p>No players yet.</p>
-    {% endfor %}
+  <form action="{% url 'generate_team' session_id %}" method="post" style="text-align: center;">
+    {% csrf_token %}
+    <button type="submit" class="generate-btn"><i class="fas fa-magic"></i> Generate Final Team</button>
+  </form>
 
-    <hr>
+  <footer>
+    &copy; 2025 CricZone. All rights reserved. | The ultimate cricket team management platform
+  </footer>
 
-    <form action="{% url 'generate_team' session_id %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Generate Team</button>
-    </form>
 </body>
 </html>
